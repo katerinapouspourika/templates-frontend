@@ -1,0 +1,62 @@
+/*
+ * Global styles, organised with cascade layers so specificity stays predictable:
+ * later layers win, and unlayered styles (e.g. CSS Modules) win over all layers.
+ */
+@layer reset, tokens, base;
+
+@layer reset {
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
+
+  body {
+    margin: 0;
+  }
+
+  img,
+  svg,
+  video {
+    display: block;
+    max-width: 100%;
+  }
+
+  button,
+  input,
+  select,
+  textarea {
+    font: inherit;
+  }
+}
+
+@layer tokens {
+  :root {
+    color-scheme: light dark;
+
+    --color-bg: light-dark(#fff, #121212);
+    --color-fg: light-dark(#1a1a1a, #ededed);
+    --color-accent: light-dark(#4f46e5, #818cf8);
+    --color-accent-fg: light-dark(#fff, #121212);
+    --radius: 0.5rem;
+    --space-2: 0.5rem;
+    --space-4: 1rem;
+    --space-8: 2rem;
+    --font-sans: system-ui, -apple-system, "Segoe UI", roboto, sans-serif;
+  }
+}
+
+@layer base {
+  body {
+    min-height: 100dvh;
+    font-family: var(--font-sans);
+    line-height: 1.5;
+    color: var(--color-fg);
+    background: var(--color-bg);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
+  }
+}

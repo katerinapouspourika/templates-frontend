@@ -1,0 +1,13 @@
+{
+  "description": "Plain TypeScript, HTML and CSS — no UI framework.",
+  "removeDependencies": [
+    "react",
+    "react-dom",
+    "@types/react",
+    "@types/react-dom",
+    "@vitejs/plugin-react",
+    "@testing-library/react",
+    "eslint-plugin-react-hooks",
+    "eslint-plugin-react-refresh"
+  ]
+}
