@@ -1,0 +1,21 @@
+.app {
+  display: grid;
+  gap: var(--space-4);
+  place-content: center;
+  min-height: 100dvh;
+  padding: var(--space-8);
+  text-align: center;
+}
+
+.counter {
+  padding: var(--space-2) var(--space-4);
+  color: var(--color-accent-fg);
+  cursor: pointer;
+  background: var(--color-accent);
+  border: none;
+  border-radius: var(--radius);
+
+  &:hover {
+    filter: brightness(1.1);
+  }
+}

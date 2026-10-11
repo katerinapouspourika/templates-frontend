@@ -1,0 +1,78 @@
+# Verifies the template itself: every variant, both standalone and nested in another repository.
+# `npm run init` deletes this file from generated projects; they keep ci.yml.
+name: Template CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+env:
+  HUSKY: 0
+
+jobs:
+  variant:
+    name: ${{ matrix.variant }} (${{ matrix.mode }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        variant: [vanilla, react]
+        mode: [standalone, nested]
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - run: npm ci
+
+      - name: Initialise (standalone)
+        if: matrix.mode == 'standalone'
+        run: |
+          npm run init -- --variant ${{ matrix.variant }}
+          echo "APP_DIR=$GITHUB_WORKSPACE" >> "$GITHUB_ENV"
+
+      - name: Initialise (nested in a host repository)
+        if: matrix.mode == 'nested'
+        run: |
+          host="$RUNNER_TEMP/host"
+          mkdir -p "$host" && git -C "$host" init -q
+          npm run init -- --variant ${{ matrix.variant }} --target "$host/src/Web"
+          test -f "$host/.github/workflows/frontend.yml"
+          test -f "$host/.github/dependabot.yml"
+          grep -q "working-directory: src/Web" "$host/.github/workflows/frontend.yml"
+          echo "APP_DIR=$host/src/Web" >> "$GITHUB_ENV"
+
+      - name: Check
+        working-directory: ${{ env.APP_DIR }}
+        run: |
+          test ! -d variants
+          npm run format:check
+          npm run lint
+          npm run typecheck
+          npm run test:coverage
+          npm run build
+
+      - name: End-to-end tests
+        working-directory: ${{ env.APP_DIR }}
+        run: |
+          npx playwright install --with-deps chromium
+          npm run test:e2e
+
+  docker:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - run: npm run init -- --variant react
+      - run: docker build -f docker/Dockerfile -t frontend-template .
